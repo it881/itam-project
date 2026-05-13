@@ -1,4 +1,6 @@
 // GET Employees
+const multer = require("multer");
+const XLSX = require("xlsx");
 app.get("/api/employees", (req, res) => {
   db.all(
     "SELECT * FROM employees",
@@ -13,6 +15,9 @@ app.get("/api/employees", (req, res) => {
       res.json(rows);
     }
   );
+});
+const upload = multer({
+  dest: "uploads/",
 });
 
 // ADD Employee
@@ -273,3 +278,101 @@ app.delete("/api/maintenance/:id", (req, res) => {
     }
   );
 });
+// EXPORT Assets to Excel
+app.get("/api/export-assets", (req, res) => {
+
+  db.all(
+    "SELECT * FROM assets",
+    [],
+    (err, rows) => {
+
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      // Convert JSON → worksheet
+      const worksheet =
+        XLSX.utils.json_to_sheet(rows);
+
+      // Create workbook
+      const workbook =
+        XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Assets"
+      );
+
+      // Save file
+      const filePath =
+        "./uploads/assets.xlsx";
+
+      XLSX.writeFile(
+        workbook,
+        filePath
+      );
+
+      // Download file
+      res.download(filePath);
+    }
+  );
+});
+// IMPORT Assets from Excel
+app.post(
+  "/api/import-assets",
+  upload.single("file"),
+  (req, res) => {
+
+    try {
+
+      // Read uploaded file
+      const workbook =
+        XLSX.readFile(req.file.path);
+
+      const sheetName =
+        workbook.SheetNames[0];
+
+      const worksheet =
+        workbook.Sheets[sheetName];
+
+      const data =
+        XLSX.utils.sheet_to_json(
+          worksheet
+        );
+
+      // Insert into database
+      data.forEach((item) => {
+
+        db.run(
+          `
+          INSERT INTO assets
+          (
+            name,
+            type
+          )
+          VALUES (?, ?)
+          `,
+          [
+            item.name,
+            item.type,
+          ]
+        );
+      });
+
+      res.json({
+        message:
+          "Assets imported successfully",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        error: error.message,
+      });
+
+    }
+  }
+);

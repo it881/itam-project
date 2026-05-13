@@ -85,3 +85,13 @@ db.run(`
     assigned_date TEXT
   )
 `);
+db.run(`
+  CREATE TABLE IF NOT EXISTS maintenance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_name TEXT,
+    issue_description TEXT,
+    vendor TEXT,
+    status TEXT,
+    maintenance_date TEXT
+  )
+`);

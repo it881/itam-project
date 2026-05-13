@@ -191,3 +191,85 @@ app.delete("/api/assignments/:id", (req, res) => {
     }
   );
 });
+// GET Maintenance Records
+app.get("/api/maintenance", (req, res) => {
+  db.all(
+    "SELECT * FROM maintenance",
+    [],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
+
+// ADD Maintenance Record
+app.post("/api/maintenance", (req, res) => {
+  const {
+    asset_name,
+    issue_description,
+    vendor,
+    status,
+    maintenance_date,
+  } = req.body;
+
+  db.run(
+    `
+    INSERT INTO maintenance
+    (
+      asset_name,
+      issue_description,
+      vendor,
+      status,
+      maintenance_date
+    )
+    VALUES (?, ?, ?, ?, ?)
+    `,
+    [
+      asset_name,
+      issue_description,
+      vendor,
+      status,
+      maintenance_date,
+    ],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message:
+          "Maintenance record added",
+      });
+    }
+  );
+});
+
+// DELETE Maintenance Record
+app.delete("/api/maintenance/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run(
+    "DELETE FROM maintenance WHERE id = ?",
+    [id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message:
+          "Maintenance record deleted",
+      });
+    }
+  );
+});

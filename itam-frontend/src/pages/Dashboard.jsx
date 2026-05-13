@@ -1,38 +1,90 @@
-import Maintenance from "./Maintenance";
 import { useEffect, useState } from "react";
+
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+
 import Assets from "./Assets";
 import Employees from "./Employees";
 import Assignments from "./Assignments";
-<button
-  className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-  onClick={() => setPage("maintenance")}
->
-  Maintenance
-</button>
+import Maintenance from "./Maintenance";
+
 function Dashboard() {
-  const [page, setPage] = useState("dashboard");
 
-  const [stats, setStats] = useState({
-    totalAssets: 0,
-    totalEmployees: 0,
-    totalAssignments: 0,
-  });
+  const [page, setPage] =
+    useState("dashboard");
 
-  const fetchStats = async () => {
-    const res = await fetch(
-      "https://itam-backend-jgzp.onrender.com/api/dashboard-stats"
-    );
+  const [assets, setAssets] =
+    useState([]);
 
-    const data = await res.json();
+  const [employees, setEmployees] =
+    useState([]);
 
-    setStats(data);
+  const [assignments, setAssignments] =
+    useState([]);
+
+  const [maintenance, setMaintenance] =
+    useState([]);
+
+  // FETCH DATA
+  const fetchData = async () => {
+
+    try {
+
+      const assetsRes = await fetch(
+        "https://itam-backend-jgzp.onrender.com/api/assets"
+      );
+
+      const employeesRes = await fetch(
+        "https://itam-backend-jgzp.onrender.com/api/employees"
+      );
+
+      const assignmentsRes = await fetch(
+        "https://itam-backend-jgzp.onrender.com/api/assignments"
+      );
+
+      const maintenanceRes = await fetch(
+        "https://itam-backend-jgzp.onrender.com/api/maintenance"
+      );
+
+      const assetsData =
+        await assetsRes.json();
+
+      const employeesData =
+        await employeesRes.json();
+
+      const assignmentsData =
+        await assignmentsRes.json();
+
+      const maintenanceData =
+        await maintenanceRes.json();
+
+      setAssets(assetsData);
+      setEmployees(employeesData);
+      setAssignments(assignmentsData);
+      setMaintenance(maintenanceData);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
   };
 
   useEffect(() => {
-    fetchStats();
+    fetchData();
   }, []);
 
-  // Navigation Pages
+  // PAGE NAVIGATION
   if (page === "assets") {
     return <Assets />;
   }
@@ -44,17 +96,67 @@ function Dashboard() {
   if (page === "assignments") {
     return <Assignments />;
   }
-if (page === "maintenance") {
-  return <Maintenance />;
-}
-  const handleLogout = () => {
-    window.location.reload();
-  };
+
+  if (page === "maintenance") {
+    return <Maintenance />;
+  }
+
+  // CHART DATA
+
+  // Asset Types
+  const assetTypeData = [];
+
+  const typeCount = {};
+
+  assets.forEach((asset) => {
+
+    if (typeCount[asset.type]) {
+
+      typeCount[asset.type]++;
+
+    } else {
+
+      typeCount[asset.type] = 1;
+    }
+  });
+
+  for (let key in typeCount) {
+
+    assetTypeData.push({
+      name: key,
+      value: typeCount[key],
+    });
+  }
+
+  // Maintenance Status
+  const maintenanceDataChart = [];
+
+  const statusCount = {};
+
+  maintenance.forEach((item) => {
+
+    if (statusCount[item.status]) {
+
+      statusCount[item.status]++;
+
+    } else {
+
+      statusCount[item.status] = 1;
+    }
+  });
+
+  for (let key in statusCount) {
+
+    maintenanceDataChart.push({
+      name: key,
+      value: statusCount[key],
+    });
+  }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen flex bg-gray-100">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <div className="w-64 bg-gray-900 text-white p-6">
 
         <h1 className="text-3xl font-bold mb-10">
@@ -63,99 +165,185 @@ if (page === "maintenance") {
 
         <button
           className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() => setPage("dashboard")}
+          onClick={() =>
+            setPage("dashboard")
+          }
         >
           Dashboard
         </button>
 
         <button
           className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() => setPage("assets")}
+          onClick={() =>
+            setPage("assets")
+          }
         >
           Assets
         </button>
 
         <button
           className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() => setPage("employees")}
+          onClick={() =>
+            setPage("employees")
+          }
         >
           Employees
         </button>
 
         <button
           className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() => setPage("assignments")}
+          onClick={() =>
+            setPage("assignments")
+          }
         >
           Assignments
         </button>
 
         <button
-          className="block w-full text-left p-3 rounded-lg mt-10 bg-red-600 hover:bg-red-700"
-          onClick={handleLogout}
+          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
+          onClick={() =>
+            setPage("maintenance")
+          }
         >
-          Logout
+          Maintenance
         </button>
 
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 bg-gray-100 p-8">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-8">
 
         <h1 className="text-4xl font-bold mb-8">
-          Dashboard Overview
+          Dashboard Analytics
         </h1>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-6">
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-4 gap-6 mb-10">
 
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-xl font-semibold">
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-gray-500">
               Total Assets
             </h2>
 
-            <p className="text-5xl font-bold mt-4 text-blue-600">
-              {stats.totalAssets}
+            <p className="text-4xl font-bold mt-3">
+              {assets.length}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-xl font-semibold">
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-gray-500">
               Employees
             </h2>
 
-            <p className="text-5xl font-bold mt-4 text-green-600">
-              {stats.totalEmployees}
+            <p className="text-4xl font-bold mt-3">
+              {employees.length}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-xl font-semibold">
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-gray-500">
               Assignments
             </h2>
 
-            <p className="text-5xl font-bold mt-4 text-purple-600">
-              {stats.totalAssignments}
+            <p className="text-4xl font-bold mt-3">
+              {assignments.length}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-gray-500">
+              Maintenance
+            </h2>
+
+            <p className="text-4xl font-bold mt-3">
+              {maintenance.length}
             </p>
           </div>
 
         </div>
 
-        {/* Welcome Card */}
-        <div className="bg-white rounded-2xl shadow p-6 mt-10">
+        {/* CHARTS */}
+        <div className="grid grid-cols-2 gap-8">
 
-          <h2 className="text-2xl font-bold mb-4">
-            Welcome to IT Asset Management System
-          </h2>
+          {/* ASSET TYPES */}
+          <div className="bg-white p-6 rounded-2xl shadow">
 
-          <p className="text-gray-600 text-lg">
-            Manage assets, employees, assignments,
-            maintenance tracking, and audit logs
-            from one centralized dashboard.
-          </p>
+            <h2 className="text-2xl font-semibold mb-6">
+              Asset Types
+            </h2>
+
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+
+              <PieChart>
+
+                <Pie
+                  data={assetTypeData}
+                  dataKey="value"
+                  nameKey="name"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  label
+                >
+
+                  {assetTypeData.map(
+                    (entry, index) => (
+                      <Cell
+                        key={index}
+                      />
+                    )
+                  )}
+
+                </Pie>
+
+                <Tooltip />
+
+              </PieChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
+          {/* MAINTENANCE STATUS */}
+          <div className="bg-white p-6 rounded-2xl shadow">
+
+            <h2 className="text-2xl font-semibold mb-6">
+              Maintenance Status
+            </h2>
+
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+
+              <BarChart
+                data={maintenanceDataChart}
+              >
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis dataKey="name" />
+
+                <YAxis />
+
+                <Tooltip />
+
+                <Bar dataKey="value" />
+
+              </BarChart>
+
+            </ResponsiveContainer>
+
+          </div>
 
         </div>
 
       </div>
+
     </div>
   );
 }

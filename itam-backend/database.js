@@ -77,3 +77,11 @@ db.run(`
     designation TEXT
   )
 `);
+db.run(`
+  CREATE TABLE IF NOT EXISTS assignments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_name TEXT,
+    employee_name TEXT,
+    assigned_date TEXT
+  )
+`);

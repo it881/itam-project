@@ -117,3 +117,77 @@ app.delete("/api/employees/:id", (req, res) => {
     }
   );
 });
+// GET Assignments
+app.get("/api/assignments", (req, res) => {
+  db.all(
+    "SELECT * FROM assignments",
+    [],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
+
+// ADD Assignment
+app.post("/api/assignments", (req, res) => {
+  const {
+    asset_name,
+    employee_name,
+    assigned_date,
+  } = req.body;
+
+  db.run(
+    `
+    INSERT INTO assignments
+    (
+      asset_name,
+      employee_name,
+      assigned_date
+    )
+    VALUES (?, ?, ?)
+    `,
+    [
+      asset_name,
+      employee_name,
+      assigned_date,
+    ],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message: "Assignment created",
+      });
+    }
+  );
+});
+
+// DELETE Assignment
+app.delete("/api/assignments/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run(
+    "DELETE FROM assignments WHERE id = ?",
+    [id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message: "Assignment deleted",
+      });
+    }
+  );
+});

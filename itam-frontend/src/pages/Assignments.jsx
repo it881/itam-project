@@ -6,7 +6,7 @@ function Assignments() {
   const [employee, setEmployee] = useState("");
 
   const fetchAssignments = async () => {
-    const res = await fetch("http://localhost:5000/api/assignments");
+    const res = await fetch("https://itam-backend-jgzp.onrender.com//api/assignments");
     const data = await res.json();
     setAssignments(data);
   };
@@ -21,7 +21,7 @@ function Assignments() {
       return;
     }
 
-    await fetch("http://localhost:5000/api/assignments", {
+    await fetch("https://itam-backend-jgzp.onrender.com//api/assignments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

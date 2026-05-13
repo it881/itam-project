@@ -8,7 +8,7 @@ function Assets() {
   const [editingId, setEditingId] = useState(null);
 
   const fetchAssets = async () => {
-    const res = await fetch("http://localhost:5000/api/assets");
+    const res = await fetch("https://itam-backend-jgzp.onrender.com//api/assets");
     const data = await res.json();
     setAssets(data);
   };
@@ -26,7 +26,7 @@ function Assets() {
 
     if (editingId) {
       // UPDATE
-      await fetch(`http://localhost:5000/api/assets/${editingId}`, {
+      await fetch(`https://itam-backend-jgzp.onrender.com//api/assets/${editingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -53,7 +53,7 @@ function Assets() {
 
   // DELETE
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/api/assets/${id}`, {
+    await fetch(`https://itam-backend-jgzp.onrender.com//api/assets/${id}`, {
       method: "DELETE",
     });
 

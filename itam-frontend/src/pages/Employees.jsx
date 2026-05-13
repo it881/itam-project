@@ -5,7 +5,7 @@ function Employees() {
   const [name, setName] = useState("");
 
   const fetchEmployees = async () => {
-    const res = await fetch("http://localhost:5000/api/employees");
+    const res = await fetch("https://itam-backend-jgzp.onrender.com//api/employees");
     const data = await res.json();
     setEmployees(data);
   };
@@ -20,7 +20,7 @@ function Employees() {
       return;
     }
 
-    await fetch("http://localhost:5000/api/employees", {
+    await fetch("https://itam-backend-jgzp.onrender.com//api/employees", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

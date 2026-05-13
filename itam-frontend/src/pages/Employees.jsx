@@ -20,7 +20,7 @@ function Employees() {
       return;
     }
 
-    await fetch("https://itam-backend-jgzp.onrender.com//api/employees", {
+    await fetch("https://https://itam-backend-jgzp.onrender.com//api/employees", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

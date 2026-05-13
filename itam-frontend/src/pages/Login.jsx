@@ -9,7 +9,7 @@ function Login() {
 
   const handleLogin = async () => {
     const res = await fetch(
-      "https://https://https://itam-backend-jgzp.onrender.com//api/login",
+      "https://https://https://https://itam-backend-jgzp.onrender.com//api/login",
       {
         method: "POST",
         headers: {

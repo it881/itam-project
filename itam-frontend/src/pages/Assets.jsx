@@ -10,7 +10,7 @@ function Assets() {
 
   const fetchAssets = async () => {
     const res = await fetch(
-      "https://https://https://itam-backend-jgzp.onrender.com//api/assets"
+      "https://https://https://https://itam-backend-jgzp.onrender.com//api/assets"
     );
 
     const data = await res.json();

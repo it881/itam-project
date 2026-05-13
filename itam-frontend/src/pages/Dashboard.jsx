@@ -14,7 +14,7 @@ function Dashboard() {
 
   const fetchStats = async () => {
     const res = await fetch(
-      "https://https://itam-backend-jgzp.onrender.com//api/dashboard-stats"
+      "https://https://https://itam-backend-jgzp.onrender.com//api/dashboard-stats"
     );
 
     const data = await res.json();

@@ -37,7 +37,7 @@ function Assets() {
       setEditingId(null);
     } else {
       // CREATE
-      await fetch("http://localhost:5000/api/assets", {
+      await fetch("http://https://itam-backend-jgzp.onrender.com//api/assets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,8 +1,14 @@
+import Maintenance from "./Maintenance";
 import { useEffect, useState } from "react";
 import Assets from "./Assets";
 import Employees from "./Employees";
 import Assignments from "./Assignments";
-
+<button
+  className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
+  onClick={() => setPage("maintenance")}
+>
+  Maintenance
+</button>
 function Dashboard() {
   const [page, setPage] = useState("dashboard");
 
@@ -38,7 +44,9 @@ function Dashboard() {
   if (page === "assignments") {
     return <Assignments />;
   }
-
+if (page === "maintenance") {
+  return <Maintenance />;
+}
   const handleLogout = () => {
     window.location.reload();
   };

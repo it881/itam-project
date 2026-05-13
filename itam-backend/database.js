@@ -69,9 +69,11 @@ db.run(`
 
 // Audit logs table
 db.run(`
-  CREATE TABLE IF NOT EXISTS audit_logs (
+  CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    action TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    name TEXT,
+    email TEXT,
+    department TEXT,
+    designation TEXT
   )
 `);

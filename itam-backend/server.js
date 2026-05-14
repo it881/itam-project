@@ -1,12 +1,127 @@
-// GET Employees
+const express = require("express");
+const cors = require("cors");
+const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const XLSX = require("xlsx");
-app.get("/api/employees", (req, res) => {
+
+const app = express();
+
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+
+// FILE UPLOAD
+const upload = multer({
+  dest: "uploads/",
+});
+
+// DATABASE
+const db = new sqlite3.Database(
+  "./database.db",
+  (err) => {
+
+    if (err) {
+
+      console.log(err.message);
+
+    } else {
+
+      console.log(
+        "Connected to SQLite database"
+      );
+    }
+  }
+);
+
+//
+// CREATE TABLES
+//
+
+// ASSETS TABLE
+db.run(`
+  CREATE TABLE IF NOT EXISTS assets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    type TEXT
+  )
+`);
+
+// EMPLOYEES TABLE
+db.run(`
+  CREATE TABLE IF NOT EXISTS employees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT,
+    department TEXT,
+    designation TEXT
+  )
+`);
+
+// ASSIGNMENTS TABLE
+db.run(`
+  CREATE TABLE IF NOT EXISTS assignments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_name TEXT,
+    employee_name TEXT,
+    assigned_date TEXT
+  )
+`);
+
+// MAINTENANCE TABLE
+db.run(`
+  CREATE TABLE IF NOT EXISTS maintenance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_name TEXT,
+    issue_description TEXT,
+    vendor TEXT,
+    status TEXT,
+    maintenance_date TEXT
+  )
+`);
+
+//
+// LOGIN API
+//
+
+app.post("/api/login", (req, res) => {
+
+  const { username, password } =
+    req.body;
+
+  if (
+    username === "admin" &&
+    password === "admin123"
+  ) {
+
+    res.json({
+      success: true,
+      message: "Login successful",
+    });
+
+  } else {
+
+    res.status(401).json({
+      success: false,
+      message: "Invalid credentials",
+    });
+  }
+});
+
+//
+// ASSETS APIs
+//
+
+// GET ASSETS
+app.get("/api/assets", (req, res) => {
+
   db.all(
-    "SELECT * FROM employees",
+    "SELECT * FROM assets",
     [],
     (err, rows) => {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
@@ -16,12 +131,127 @@ app.get("/api/employees", (req, res) => {
     }
   );
 });
-const upload = multer({
-  dest: "uploads/",
+
+// ADD ASSET
+app.post("/api/assets", (req, res) => {
+
+  const { name, type } = req.body;
+
+  db.run(
+    `
+    INSERT INTO assets
+    (
+      name,
+      type
+    )
+    VALUES (?, ?)
+    `,
+    [name, type],
+
+    function (err) {
+
+      if (err) {
+
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message:
+          "Asset added successfully",
+      });
+    }
+  );
 });
 
-// ADD Employee
+// UPDATE ASSET
+app.put("/api/assets/:id", (req, res) => {
+
+  const { id } = req.params;
+
+  const { name, type } = req.body;
+
+  db.run(
+    `
+    UPDATE assets
+    SET
+      name = ?,
+      type = ?
+    WHERE id = ?
+    `,
+    [name, type, id],
+
+    function (err) {
+
+      if (err) {
+
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message:
+          "Asset updated successfully",
+      });
+    }
+  );
+});
+
+// DELETE ASSET
+app.delete("/api/assets/:id", (req, res) => {
+
+  const { id } = req.params;
+
+  db.run(
+    "DELETE FROM assets WHERE id = ?",
+    [id],
+
+    function (err) {
+
+      if (err) {
+
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json({
+        message:
+          "Asset deleted successfully",
+      });
+    }
+  );
+});
+
+//
+// EMPLOYEE APIs
+//
+
+// GET EMPLOYEES
+app.get("/api/employees", (req, res) => {
+
+  db.all(
+    "SELECT * FROM employees",
+    [],
+    (err, rows) => {
+
+      if (err) {
+
+        return res.status(500).json({
+          error: err.message,
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
+
+// ADD EMPLOYEE
 app.post("/api/employees", (req, res) => {
+
   const {
     name,
     email,
@@ -46,22 +276,27 @@ app.post("/api/employees", (req, res) => {
       department,
       designation,
     ],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
       }
 
       res.json({
-        message: "Employee added successfully",
+        message:
+          "Employee added successfully",
       });
     }
   );
 });
 
-// UPDATE Employee
+// UPDATE EMPLOYEE
 app.put("/api/employees/:id", (req, res) => {
+
   const { id } = req.params;
 
   const {
@@ -88,47 +323,64 @@ app.put("/api/employees/:id", (req, res) => {
       designation,
       id,
     ],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
       }
 
       res.json({
-        message: "Employee updated successfully",
+        message:
+          "Employee updated successfully",
       });
     }
   );
 });
 
-// DELETE Employee
+// DELETE EMPLOYEE
 app.delete("/api/employees/:id", (req, res) => {
+
   const { id } = req.params;
 
   db.run(
     "DELETE FROM employees WHERE id = ?",
     [id],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
       }
 
       res.json({
-        message: "Employee deleted successfully",
+        message:
+          "Employee deleted successfully",
       });
     }
   );
 });
-// GET Assignments
+
+//
+// ASSIGNMENT APIs
+//
+
+// GET ASSIGNMENTS
 app.get("/api/assignments", (req, res) => {
+
   db.all(
     "SELECT * FROM assignments",
     [],
     (err, rows) => {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
@@ -139,8 +391,9 @@ app.get("/api/assignments", (req, res) => {
   );
 });
 
-// ADD Assignment
+// ADD ASSIGNMENT
 app.post("/api/assignments", (req, res) => {
+
   const {
     asset_name,
     employee_name,
@@ -162,47 +415,64 @@ app.post("/api/assignments", (req, res) => {
       employee_name,
       assigned_date,
     ],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
       }
 
       res.json({
-        message: "Assignment created",
+        message:
+          "Assignment created",
       });
     }
   );
 });
 
-// DELETE Assignment
+// DELETE ASSIGNMENT
 app.delete("/api/assignments/:id", (req, res) => {
+
   const { id } = req.params;
 
   db.run(
     "DELETE FROM assignments WHERE id = ?",
     [id],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
       }
 
       res.json({
-        message: "Assignment deleted",
+        message:
+          "Assignment deleted",
       });
     }
   );
 });
-// GET Maintenance Records
+
+//
+// MAINTENANCE APIs
+//
+
+// GET MAINTENANCE
 app.get("/api/maintenance", (req, res) => {
+
   db.all(
     "SELECT * FROM maintenance",
     [],
     (err, rows) => {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
@@ -213,8 +483,9 @@ app.get("/api/maintenance", (req, res) => {
   );
 });
 
-// ADD Maintenance Record
+// ADD MAINTENANCE
 app.post("/api/maintenance", (req, res) => {
+
   const {
     asset_name,
     issue_description,
@@ -242,8 +513,11 @@ app.post("/api/maintenance", (req, res) => {
       status,
       maintenance_date,
     ],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
@@ -257,15 +531,19 @@ app.post("/api/maintenance", (req, res) => {
   );
 });
 
-// DELETE Maintenance Record
+// DELETE MAINTENANCE
 app.delete("/api/maintenance/:id", (req, res) => {
+
   const { id } = req.params;
 
   db.run(
     "DELETE FROM maintenance WHERE id = ?",
     [id],
+
     function (err) {
+
       if (err) {
+
         return res.status(500).json({
           error: err.message,
         });
@@ -278,49 +556,59 @@ app.delete("/api/maintenance/:id", (req, res) => {
     }
   );
 });
-// EXPORT Assets to Excel
-app.get("/api/export-assets", (req, res) => {
 
-  db.all(
-    "SELECT * FROM assets",
-    [],
-    (err, rows) => {
+//
+// EXPORT EXCEL
+//
 
-      if (err) {
-        return res.status(500).json({
-          error: err.message,
-        });
+app.get(
+  "/api/export-assets",
+  (req, res) => {
+
+    db.all(
+      "SELECT * FROM assets",
+      [],
+      (err, rows) => {
+
+        if (err) {
+
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+
+        const worksheet =
+          XLSX.utils.json_to_sheet(
+            rows
+          );
+
+        const workbook =
+          XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+          workbook,
+          worksheet,
+          "Assets"
+        );
+
+        const filePath =
+          "./uploads/assets.xlsx";
+
+        XLSX.writeFile(
+          workbook,
+          filePath
+        );
+
+        res.download(filePath);
       }
+    );
+  }
+);
 
-      // Convert JSON → worksheet
-      const worksheet =
-        XLSX.utils.json_to_sheet(rows);
+//
+// IMPORT EXCEL
+//
 
-      // Create workbook
-      const workbook =
-        XLSX.utils.book_new();
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Assets"
-      );
-
-      // Save file
-      const filePath =
-        "./uploads/assets.xlsx";
-
-      XLSX.writeFile(
-        workbook,
-        filePath
-      );
-
-      // Download file
-      res.download(filePath);
-    }
-  );
-});
-// IMPORT Assets from Excel
 app.post(
   "/api/import-assets",
   upload.single("file"),
@@ -328,9 +616,10 @@ app.post(
 
     try {
 
-      // Read uploaded file
       const workbook =
-        XLSX.readFile(req.file.path);
+        XLSX.readFile(
+          req.file.path
+        );
 
       const sheetName =
         workbook.SheetNames[0];
@@ -343,7 +632,6 @@ app.post(
           worksheet
         );
 
-      // Insert into database
       data.forEach((item) => {
 
         db.run(
@@ -372,7 +660,17 @@ app.post(
       res.status(500).json({
         error: error.message,
       });
-
     }
   }
 );
+
+//
+// START SERVER
+//
+
+app.listen(PORT, () => {
+
+  console.log(
+    `Server running on port ${PORT}`
+  );
+});

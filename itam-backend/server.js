@@ -3,6 +3,7 @@ const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const XLSX = require("xlsx");
+const fs = require("fs");
 
 const app = express();
 
@@ -11,22 +12,27 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// CREATE UPLOADS FOLDER
+
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
+}
+
 // FILE UPLOAD
+
 const upload = multer({
   dest: "uploads/",
 });
 
 // DATABASE
+
 const db = new sqlite3.Database(
   "./database.db",
   (err) => {
 
     if (err) {
-
       console.log(err.message);
-
     } else {
-
       console.log(
         "Connected to SQLite database"
       );
@@ -38,16 +44,19 @@ const db = new sqlite3.Database(
 // CREATE TABLES
 //
 
-// ASSETS TABLE
 db.run(`
   CREATE TABLE IF NOT EXISTS assets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    type TEXT
+    type TEXT,
+    brand TEXT,
+    serialNumber TEXT,
+    status TEXT,
+    purchaseDate TEXT,
+    location TEXT
   )
 `);
 
-// EMPLOYEES TABLE
 db.run(`
   CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +67,6 @@ db.run(`
   )
 `);
 
-// ASSIGNMENTS TABLE
 db.run(`
   CREATE TABLE IF NOT EXISTS assignments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +76,6 @@ db.run(`
   )
 `);
 
-// MAINTENANCE TABLE
 db.run(`
   CREATE TABLE IF NOT EXISTS maintenance (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,10 +120,11 @@ app.post("/api/login", (req, res) => {
 //
 
 // GET ASSETS
+
 app.get("/api/assets", (req, res) => {
 
   db.all(
-    "SELECT * FROM assets",
+    "SELECT * FROM assets ORDER BY id DESC",
     [],
     (err, rows) => {
 
@@ -133,20 +141,42 @@ app.get("/api/assets", (req, res) => {
 });
 
 // ADD ASSET
+
 app.post("/api/assets", (req, res) => {
 
-  const { name, type } = req.body;
+  const {
+    name,
+    type,
+    brand,
+    serialNumber,
+    status,
+    purchaseDate,
+    location,
+  } = req.body;
 
   db.run(
     `
     INSERT INTO assets
     (
       name,
-      type
+      type,
+      brand,
+      serialNumber,
+      status,
+      purchaseDate,
+      location
     )
-    VALUES (?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
-    [name, type],
+    [
+      name,
+      type,
+      brand,
+      serialNumber,
+      status,
+      purchaseDate,
+      location,
+    ],
 
     function (err) {
 
@@ -166,21 +196,44 @@ app.post("/api/assets", (req, res) => {
 });
 
 // UPDATE ASSET
+
 app.put("/api/assets/:id", (req, res) => {
 
   const { id } = req.params;
 
-  const { name, type } = req.body;
+  const {
+    name,
+    type,
+    brand,
+    serialNumber,
+    status,
+    purchaseDate,
+    location,
+  } = req.body;
 
   db.run(
     `
     UPDATE assets
     SET
       name = ?,
-      type = ?
+      type = ?,
+      brand = ?,
+      serialNumber = ?,
+      status = ?,
+      purchaseDate = ?,
+      location = ?
     WHERE id = ?
     `,
-    [name, type, id],
+    [
+      name,
+      type,
+      brand,
+      serialNumber,
+      status,
+      purchaseDate,
+      location,
+      id,
+    ],
 
     function (err) {
 
@@ -200,6 +253,7 @@ app.put("/api/assets/:id", (req, res) => {
 });
 
 // DELETE ASSET
+
 app.delete("/api/assets/:id", (req, res) => {
 
   const { id } = req.params;
@@ -229,7 +283,6 @@ app.delete("/api/assets/:id", (req, res) => {
 // EMPLOYEE APIs
 //
 
-// GET EMPLOYEES
 app.get("/api/employees", (req, res) => {
 
   db.all(
@@ -249,7 +302,6 @@ app.get("/api/employees", (req, res) => {
   );
 });
 
-// ADD EMPLOYEE
 app.post("/api/employees", (req, res) => {
 
   const {
@@ -294,7 +346,6 @@ app.post("/api/employees", (req, res) => {
   );
 });
 
-// UPDATE EMPLOYEE
 app.put("/api/employees/:id", (req, res) => {
 
   const { id } = req.params;
@@ -341,7 +392,6 @@ app.put("/api/employees/:id", (req, res) => {
   );
 });
 
-// DELETE EMPLOYEE
 app.delete("/api/employees/:id", (req, res) => {
 
   const { id } = req.params;
@@ -362,196 +412,6 @@ app.delete("/api/employees/:id", (req, res) => {
       res.json({
         message:
           "Employee deleted successfully",
-      });
-    }
-  );
-});
-
-//
-// ASSIGNMENT APIs
-//
-
-// GET ASSIGNMENTS
-app.get("/api/assignments", (req, res) => {
-
-  db.all(
-    "SELECT * FROM assignments",
-    [],
-    (err, rows) => {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json(rows);
-    }
-  );
-});
-
-// ADD ASSIGNMENT
-app.post("/api/assignments", (req, res) => {
-
-  const {
-    asset_name,
-    employee_name,
-    assigned_date,
-  } = req.body;
-
-  db.run(
-    `
-    INSERT INTO assignments
-    (
-      asset_name,
-      employee_name,
-      assigned_date
-    )
-    VALUES (?, ?, ?)
-    `,
-    [
-      asset_name,
-      employee_name,
-      assigned_date,
-    ],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Assignment created",
-      });
-    }
-  );
-});
-
-// DELETE ASSIGNMENT
-app.delete("/api/assignments/:id", (req, res) => {
-
-  const { id } = req.params;
-
-  db.run(
-    "DELETE FROM assignments WHERE id = ?",
-    [id],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Assignment deleted",
-      });
-    }
-  );
-});
-
-//
-// MAINTENANCE APIs
-//
-
-// GET MAINTENANCE
-app.get("/api/maintenance", (req, res) => {
-
-  db.all(
-    "SELECT * FROM maintenance",
-    [],
-    (err, rows) => {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json(rows);
-    }
-  );
-});
-
-// ADD MAINTENANCE
-app.post("/api/maintenance", (req, res) => {
-
-  const {
-    asset_name,
-    issue_description,
-    vendor,
-    status,
-    maintenance_date,
-  } = req.body;
-
-  db.run(
-    `
-    INSERT INTO maintenance
-    (
-      asset_name,
-      issue_description,
-      vendor,
-      status,
-      maintenance_date
-    )
-    VALUES (?, ?, ?, ?, ?)
-    `,
-    [
-      asset_name,
-      issue_description,
-      vendor,
-      status,
-      maintenance_date,
-    ],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Maintenance record added",
-      });
-    }
-  );
-});
-
-// DELETE MAINTENANCE
-app.delete("/api/maintenance/:id", (req, res) => {
-
-  const { id } = req.params;
-
-  db.run(
-    "DELETE FROM maintenance WHERE id = ?",
-    [id],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Maintenance record deleted",
       });
     }
   );
@@ -639,13 +499,23 @@ app.post(
           INSERT INTO assets
           (
             name,
-            type
+            type,
+            brand,
+            serialNumber,
+            status,
+            purchaseDate,
+            location
           )
-          VALUES (?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
           `,
           [
-            item.name,
-            item.type,
+            item.name || "",
+            item.type || "",
+            item.brand || "",
+            item.serialNumber || "",
+            item.status || "",
+            item.purchaseDate || "",
+            item.location || "",
           ]
         );
       });
@@ -665,7 +535,7 @@ app.post(
 );
 
 //
-// START SERVER
+// SERVER
 //
 
 app.listen(PORT, () => {

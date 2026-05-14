@@ -85,6 +85,7 @@ function Dashboard() {
   }, []);
 
   // PAGE NAVIGATION
+
   if (page === "assets") {
     return <Assets />;
   }
@@ -101,9 +102,8 @@ function Dashboard() {
     return <Maintenance />;
   }
 
-  // CHART DATA
+  // PIE CHART DATA
 
-  // Asset Types
   const assetTypeData = [];
 
   const typeCount = {};
@@ -128,7 +128,8 @@ function Dashboard() {
     });
   }
 
-  // Maintenance Status
+  // BAR CHART DATA
+
   const maintenanceDataChart = [];
 
   const statusCount = {};
@@ -154,118 +155,188 @@ function Dashboard() {
   }
 
   return (
+
     <div className="min-h-screen flex bg-gray-100">
 
       {/* SIDEBAR */}
-      <div className="w-64 bg-gray-900 text-white p-6">
 
-        <h1 className="text-3xl font-bold mb-10">
-          ITAM System
-        </h1>
+      <div className="w-72 bg-slate-900 text-white p-6 shadow-2xl">
 
-        <button
-          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() =>
-            setPage("dashboard")
-          }
-        >
-          Dashboard
-        </button>
+        {/* COMPANY BRAND */}
 
-        <button
-          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() =>
-            setPage("assets")
-          }
-        >
-          Assets
-        </button>
+        <div className="mb-10 text-center">
 
-        <button
-          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() =>
-            setPage("employees")
-          }
-        >
-          Employees
-        </button>
+          <img
+            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
+            alt="Company"
+            className="rounded-2xl mb-4 h-36 w-full object-cover"
+          />
 
-        <button
-          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() =>
-            setPage("assignments")
-          }
-        >
-          Assignments
-        </button>
+          <h1 className="text-3xl font-bold text-blue-400">
+            Promea Therapeutics
+          </h1>
 
-        <button
-          className="block w-full text-left p-3 rounded-lg mb-3 hover:bg-gray-700"
-          onClick={() =>
-            setPage("maintenance")
-          }
-        >
-          Maintenance
-        </button>
+          <p className="text-gray-400 mt-2 text-sm">
+            IT Asset Management Portal
+          </p>
+
+        </div>
+
+        {/* NAVIGATION */}
+
+        <div className="space-y-3">
+
+          <button
+            className="block w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-blue-600 transition duration-300"
+            onClick={() =>
+              setPage("dashboard")
+            }
+          >
+            📊 Dashboard
+          </button>
+
+          <button
+            className="block w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-blue-600 transition duration-300"
+            onClick={() =>
+              setPage("assets")
+            }
+          >
+            💻 Assets
+          </button>
+
+          <button
+            className="block w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-blue-600 transition duration-300"
+            onClick={() =>
+              setPage("employees")
+            }
+          >
+            👨‍💼 Employees
+          </button>
+
+          <button
+            className="block w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-blue-600 transition duration-300"
+            onClick={() =>
+              setPage("assignments")
+            }
+          >
+            🔄 Assignments
+          </button>
+
+          <button
+            className="block w-full text-left p-4 rounded-xl bg-slate-800 hover:bg-blue-600 transition duration-300"
+            onClick={() =>
+              setPage("maintenance")
+            }
+          >
+            🛠 Maintenance
+          </button>
+
+        </div>
 
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 p-8">
 
-        <h1 className="text-4xl font-bold mb-8">
-          Dashboard Analytics
-        </h1>
+      <div className="flex-1 p-8 overflow-auto">
 
-        {/* STATS CARDS */}
+        {/* TOP BAR */}
+
+        <div className="bg-white rounded-2xl shadow p-6 flex justify-between items-center mb-8">
+
+          <div>
+
+            <h1 className="text-4xl font-bold text-gray-800">
+              Dashboard Analytics
+            </h1>
+
+            <p className="text-gray-500 mt-2">
+              Welcome to Promea Therapeutics IT Portal
+            </p>
+
+          </div>
+
+          <div className="flex items-center gap-4">
+
+            <div className="text-right">
+
+              <h2 className="font-bold">
+                Admin User
+              </h2>
+
+              <p className="text-gray-500 text-sm">
+                IT Department
+              </p>
+
+            </div>
+
+            <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
+              A
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* STATS */}
+
         <div className="grid grid-cols-4 gap-6 mb-10">
 
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition duration-300">
+
             <h2 className="text-gray-500">
               Total Assets
             </h2>
 
-            <p className="text-4xl font-bold mt-3">
+            <p className="text-5xl font-bold mt-4 text-blue-600">
               {assets.length}
             </p>
+
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition duration-300">
+
             <h2 className="text-gray-500">
               Employees
             </h2>
 
-            <p className="text-4xl font-bold mt-3">
+            <p className="text-5xl font-bold mt-4 text-green-600">
               {employees.length}
             </p>
+
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition duration-300">
+
             <h2 className="text-gray-500">
               Assignments
             </h2>
 
-            <p className="text-4xl font-bold mt-3">
+            <p className="text-5xl font-bold mt-4 text-orange-500">
               {assignments.length}
             </p>
+
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition duration-300">
+
             <h2 className="text-gray-500">
               Maintenance
             </h2>
 
-            <p className="text-4xl font-bold mt-3">
+            <p className="text-5xl font-bold mt-4 text-red-500">
               {maintenance.length}
             </p>
+
           </div>
 
         </div>
 
         {/* CHARTS */}
-        <div className="grid grid-cols-2 gap-8">
 
-          {/* ASSET TYPES */}
+        <div className="grid grid-cols-2 gap-8 mb-10">
+
+          {/* PIE CHART */}
+
           <div className="bg-white p-6 rounded-2xl shadow">
 
             <h2 className="text-2xl font-semibold mb-6">
@@ -274,7 +345,7 @@ function Dashboard() {
 
             <ResponsiveContainer
               width="100%"
-              height={300}
+              height={320}
             >
 
               <PieChart>
@@ -283,16 +354,13 @@ function Dashboard() {
                   data={assetTypeData}
                   dataKey="value"
                   nameKey="name"
-                  outerRadius={100}
-                  fill="#8884d8"
+                  outerRadius={110}
                   label
                 >
 
                   {assetTypeData.map(
                     (entry, index) => (
-                      <Cell
-                        key={index}
-                      />
+                      <Cell key={index} />
                     )
                   )}
 
@@ -306,7 +374,8 @@ function Dashboard() {
 
           </div>
 
-          {/* MAINTENANCE STATUS */}
+          {/* BAR CHART */}
+
           <div className="bg-white p-6 rounded-2xl shadow">
 
             <h2 className="text-2xl font-semibold mb-6">
@@ -315,7 +384,7 @@ function Dashboard() {
 
             <ResponsiveContainer
               width="100%"
-              height={300}
+              height={320}
             >
 
               <BarChart
@@ -337,6 +406,36 @@ function Dashboard() {
               </BarChart>
 
             </ResponsiveContainer>
+
+          </div>
+
+        </div>
+
+        {/* RECENT ACTIVITY */}
+
+        <div className="bg-white p-8 rounded-2xl shadow">
+
+          <h2 className="text-2xl font-bold mb-6">
+            Recent Activities
+          </h2>
+
+          <div className="space-y-4">
+
+            <div className="bg-gray-100 p-4 rounded-xl hover:bg-gray-200 transition">
+              💻 Laptop assigned to employee
+            </div>
+
+            <div className="bg-gray-100 p-4 rounded-xl hover:bg-gray-200 transition">
+              🛠 Printer maintenance completed
+            </div>
+
+            <div className="bg-gray-100 p-4 rounded-xl hover:bg-gray-200 transition">
+              🖥 New desktop added to inventory
+            </div>
+
+            <div className="bg-gray-100 p-4 rounded-xl hover:bg-gray-200 transition">
+              🔄 Asset reassigned to IT department
+            </div>
 
           </div>
 

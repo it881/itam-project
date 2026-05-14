@@ -1,54 +1,100 @@
-import { useEffect, useState, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 
 function Assets() {
-  const [assets, setAssets] = useState([]);
-  const [name, setName] = useState("");
-  const [type, setType] = useState("");
-  const [search, setSearch] = useState("");
+
+  const [assets, setAssets] =
+    useState([]);
+
+  const [name, setName] =
+    useState("");
+
+  const [type, setType] =
+    useState("");
+
+  const [brand, setBrand] =
+    useState("");
+
+  const [serialNumber, setSerialNumber] =
+    useState("");
+
+  const [status, setStatus] =
+    useState("");
+
+  const [purchaseDate, setPurchaseDate] =
+    useState("");
+
+  const [location, setLocation] =
+    useState("");
+
+  const [search, setSearch] =
+    useState("");
 
   const [editingId, setEditingId] =
     useState(null);
 
-  const fileInputRef = useRef();
+  const fileInputRef =
+    useRef();
+
+  const API =
+    "https://itam-backend-jgzp.onrender.com";
 
   // FETCH ASSETS
+
   const fetchAssets = async () => {
-    try {
 
-      const res = await fetch(
-        "https://itam-backend-jgzp.onrender.com/api/assets"
-      );
+    const res = await fetch(
+      `${API}/api/assets`
+    );
 
-      const data = await res.json();
+    const data =
+      await res.json();
 
-      setAssets(data);
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
+    setAssets(data);
   };
 
   useEffect(() => {
     fetchAssets();
   }, []);
 
-  // ADD OR UPDATE ASSET
-  const handleSaveAsset = async () => {
+  // SAVE ASSET
 
-    if (!name || !type) {
-      alert("Fill all fields");
-      return;
-    }
+  const handleSaveAsset =
+    async () => {
 
-    try {
+      if (
+        !name ||
+        !type ||
+        !brand ||
+        !serialNumber ||
+        !status
+      ) {
+        alert(
+          "Please fill all fields"
+        );
+
+        return;
+      }
+
+      const payload = {
+        name,
+        type,
+        brand,
+        serialNumber,
+        status,
+        purchaseDate,
+        location,
+      };
 
       // UPDATE
+
       if (editingId) {
 
         await fetch(
-          `https://itam-backend-jgzp.onrender.com/api/assets/${editingId}`,
+          `${API}/api/assets/${editingId}`,
           {
             method: "PUT",
 
@@ -57,22 +103,21 @@ function Assets() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              name,
-              type,
-            }),
+            body:
+              JSON.stringify(
+                payload
+              ),
           }
         );
-
-        alert("Asset updated");
 
         setEditingId(null);
 
       } else {
 
         // CREATE
+
         await fetch(
-          "https://itam-backend-jgzp.onrender.com/api/assets",
+          `${API}/api/assets`,
           {
             method: "POST",
 
@@ -81,90 +126,132 @@ function Assets() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              name,
-              type,
-            }),
+            body:
+              JSON.stringify(
+                payload
+              ),
           }
         );
-
-        alert("Asset added");
       }
 
-      setName("");
-      setType("");
+      // CLEAR FORM
+
+      resetForm();
 
       fetchAssets();
+    };
 
-    } catch (error) {
+  // RESET FORM
 
-      console.error(error);
+  const resetForm = () => {
 
-      alert("Something went wrong");
-    }
+    setName("");
+    setType("");
+    setBrand("");
+    setSerialNumber("");
+    setStatus("");
+    setPurchaseDate("");
+    setLocation("");
+    setEditingId(null);
   };
 
-  // DELETE ASSET
-  const handleDelete = async (id) => {
+  // DELETE
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this asset?"
-    );
+  const handleDelete =
+    async (id) => {
 
-    if (!confirmDelete) return;
+      const confirmDelete =
+        window.confirm(
+          "Delete this asset?"
+        );
 
-    try {
+      if (!confirmDelete)
+        return;
 
       await fetch(
-        `https://itam-backend-jgzp.onrender.com/api/assets/${id}`,
+        `${API}/api/assets/${id}`,
         {
           method: "DELETE",
         }
       );
 
-      alert("Asset deleted");
-
       fetchAssets();
+    };
 
-    } catch (error) {
+  // EDIT
 
-      console.error(error);
+  const handleEdit = (
+    asset
+  ) => {
 
-    }
-  };
+    setName(
+      asset.name || ""
+    );
 
-  // EDIT ASSET
-  const handleEdit = (asset) => {
+    setType(
+      asset.type || ""
+    );
 
-    setName(asset.name);
-    setType(asset.type);
+    setBrand(
+      asset.brand || ""
+    );
 
-    setEditingId(asset.id);
+    setSerialNumber(
+      asset.serialNumber || ""
+    );
+
+    setStatus(
+      asset.status || ""
+    );
+
+    setPurchaseDate(
+      asset.purchaseDate || ""
+    );
+
+    setLocation(
+      asset.location || ""
+    );
+
+    setEditingId(
+      asset.id
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   // EXPORT EXCEL
-  const handleExport = () => {
 
-    window.open(
-      "https://itam-backend-jgzp.onrender.com/api/export-assets"
-    );
-  };
+  const handleExport =
+    () => {
+
+      window.open(
+        `${API}/api/export-assets`
+      );
+    };
 
   // IMPORT EXCEL
-  const handleImport = async (e) => {
 
-    const file = e.target.files[0];
+  const handleImport =
+    async (e) => {
 
-    if (!file) return;
+      const file =
+        e.target.files[0];
 
-    try {
+      if (!file) return;
 
-      const formData = new FormData();
+      const formData =
+        new FormData();
 
-      formData.append("file", file);
+      formData.append(
+        "file",
+        file
+      );
 
       await fetch(
-        "https://itam-backend-jgzp.onrender.com/api/import-assets",
+        `${API}/api/import-assets`,
         {
           method: "POST",
           body: formData,
@@ -172,238 +259,658 @@ function Assets() {
       );
 
       alert(
-        "Assets imported successfully"
+        "Assets Imported Successfully"
       );
 
       fetchAssets();
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert("Import failed");
-    }
-  };
+    };
 
   // SEARCH FILTER
-  const filteredAssets = assets.filter(
-    (asset) =>
+
+  const filteredAssets =
+    assets.filter((asset) =>
       asset.name
-        .toLowerCase()
-        .includes(search.toLowerCase())
-  );
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
 
-      <div className="max-w-7xl mx-auto">
+    <div
+      className="
+        min-h-screen
+        bg-gradient-to-br
+        from-slate-100
+        via-blue-50
+        to-slate-200
+        p-8
+      "
+    >
 
-        {/* Heading */}
-        <div className="flex justify-between items-center mb-8">
+      {/* HEADER */}
 
-          <h1 className="text-4xl font-bold text-gray-800">
-            Asset Management
+      <div
+        className="
+          flex
+          justify-between
+          items-center
+          mb-8
+        "
+      >
+
+        <div>
+
+          <h1
+            className="
+              text-5xl
+              font-extrabold
+              text-slate-800
+            "
+          >
+            Promea Therapeutics
           </h1>
+
+          <p
+            className="
+              text-gray-600
+              mt-2
+              text-lg
+            "
+          >
+            Enterprise Asset
+            Management System
+          </p>
 
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-2xl shadow p-6 mb-8">
+        <button
+          onClick={() =>
+            window.location.reload()
+          }
+          className="
+            bg-slate-800
+            hover:bg-slate-900
+            text-white
+            px-6
+            py-3
+            rounded-2xl
+            shadow-lg
+            transition
+          "
+        >
+          ← Dashboard
+        </button>
 
-          <h2 className="text-2xl font-semibold mb-4">
-            {editingId
-              ? "Update Asset"
-              : "Add New Asset"}
-          </h2>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* FORM */}
 
-            {/* Asset Name */}
-            <input
-              type="text"
-              placeholder="Enter Asset Name"
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+      <div
+        className="
+          bg-white/90
+          backdrop-blur-lg
+          rounded-3xl
+          shadow-2xl
+          border
+          border-gray-200
+          p-10
+          mb-10
+        "
+      >
 
-            {/* Asset Type */}
-            <input
-              type="text"
-              placeholder="Enter Asset Type"
-              value={type}
-              onChange={(e) =>
-                setType(e.target.value)
-              }
-              className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <div
+          className="
+            flex
+            justify-between
+            items-center
+            mb-8
+          "
+        >
+
+          <div>
+
+            <h2
+              className="
+                text-4xl
+                font-bold
+                text-slate-800
+              "
+            >
+              Asset Management
+            </h2>
+
+            <p
+              className="
+                text-gray-500
+                mt-2
+              "
+            >
+              Manage company assets
+              professionally
+            </p>
 
           </div>
 
-          {/* Save Button */}
-          <button
-            onClick={handleSaveAsset}
-            className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          <div
+            className="
+              bg-blue-100
+              text-blue-700
+              px-6
+              py-3
+              rounded-2xl
+              font-semibold
+            "
           >
-            {editingId
-              ? "Update Asset"
-              : "Add Asset"}
-          </button>
+            Total Assets:
+            {" "}
+            {assets.length}
+          </div>
 
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* FORM GRID */}
+
+        <div
+          className="
+            grid
+            grid-cols-3
+            gap-5
+          "
+        >
 
           <input
             type="text"
-            placeholder="Search assets..."
-            value={search}
+            placeholder="Asset Name"
+            value={name}
             onChange={(e) =>
-              setSearch(e.target.value)
+              setName(
+                e.target.value
+              )
             }
-            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
           />
 
+          <input
+            type="text"
+            placeholder="Asset Type"
+            value={type}
+            onChange={(e) =>
+              setType(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          />
+
+          <input
+            type="text"
+            placeholder="Brand"
+            value={brand}
+            onChange={(e) =>
+              setBrand(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          />
+
+          <input
+            type="text"
+            placeholder="Serial Number"
+            value={serialNumber}
+            onChange={(e) =>
+              setSerialNumber(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          />
+
+          <input
+            type="date"
+            value={purchaseDate}
+            onChange={(e) =>
+              setPurchaseDate(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          />
+
+          <input
+            type="text"
+            placeholder="Location"
+            value={location}
+            onChange={(e) =>
+              setLocation(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          />
+
+          <select
+            value={status}
+            onChange={(e) =>
+              setStatus(
+                e.target.value
+              )
+            }
+            className="
+              border
+              border-gray-300
+              bg-gray-50
+              p-4
+              rounded-2xl
+              focus:ring-2
+              focus:ring-blue-500
+              outline-none
+            "
+          >
+
+            <option value="">
+              Select Status
+            </option>
+
+            <option value="Available">
+              Available
+            </option>
+
+            <option value="Assigned">
+              Assigned
+            </option>
+
+            <option value="Maintenance">
+              Maintenance
+            </option>
+
+          </select>
+
         </div>
 
-        {/* Import Export Buttons */}
-        <div className="flex gap-4 mb-6">
+        {/* BUTTONS */}
 
-          {/* Export */}
+        <div
+          className="
+            flex
+            flex-wrap
+            gap-4
+            mt-8
+          "
+        >
+
           <button
-            onClick={handleExport}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+            onClick={
+              handleSaveAsset
+            }
+            className="
+              bg-gradient-to-r
+              from-blue-600
+              to-blue-800
+              text-white
+              px-10
+              py-4
+              rounded-2xl
+              shadow-xl
+              hover:scale-105
+              transition
+              font-semibold
+            "
           >
-            Export Excel
+            {editingId
+              ? "✏ Update Asset"
+              : "➕ Add Asset"}
           </button>
 
-          {/* Import */}
-          <div>
+          <button
+            onClick={resetForm}
+            className="
+              bg-gray-200
+              hover:bg-gray-300
+              text-slate-700
+              px-8
+              py-4
+              rounded-2xl
+              transition
+              font-semibold
+            "
+          >
+            Reset
+          </button>
 
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              ref={fileInputRef}
-              onChange={handleImport}
-              className="hidden"
-            />
+          <button
+            onClick={
+              handleExport
+            }
+            className="
+              bg-gradient-to-r
+              from-green-500
+              to-green-700
+              text-white
+              px-8
+              py-4
+              rounded-2xl
+              shadow-lg
+              hover:scale-105
+              transition
+              font-semibold
+            "
+          >
+            📥 Export Excel
+          </button>
 
-            <button
-              onClick={() =>
-                fileInputRef.current.click()
-              }
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              Import Excel
-            </button>
+          {/* IMPORT */}
 
-          </div>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            ref={fileInputRef}
+            onChange={
+              handleImport
+            }
+            className="hidden"
+          />
+
+          <button
+            onClick={() =>
+              fileInputRef.current.click()
+            }
+            className="
+              bg-gradient-to-r
+              from-purple-500
+              to-purple-700
+              text-white
+              px-8
+              py-4
+              rounded-2xl
+              shadow-lg
+              hover:scale-105
+              transition
+              font-semibold
+            "
+          >
+            📤 Import Excel
+          </button>
 
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
+      </div>
 
-          <table className="w-full">
+      {/* SEARCH */}
 
-            {/* Table Head */}
-            <thead className="bg-gray-200">
+      <div className="mb-6">
 
-              <tr>
+        <input
+          type="text"
+          placeholder="🔍 Search Assets..."
+          value={search}
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+          className="
+            w-full
+            border
+            border-gray-300
+            p-5
+            rounded-2xl
+            shadow-lg
+            focus:ring-2
+            focus:ring-blue-500
+            outline-none
+          "
+        />
 
-                <th className="text-left p-4">
-                  ID
-                </th>
+      </div>
 
-                <th className="text-left p-4">
-                  Asset Name
-                </th>
+      {/* TABLE */}
 
-                <th className="text-left p-4">
-                  Asset Type
-                </th>
+      <div
+        className="
+          bg-white
+          rounded-3xl
+          shadow-2xl
+          overflow-hidden
+        "
+      >
 
-                <th className="text-left p-4">
-                  Actions
-                </th>
+        <table className="w-full">
 
-              </tr>
+          <thead
+            className="
+              bg-gradient-to-r
+              from-slate-900
+              to-slate-700
+              text-white
+            "
+          >
 
-            </thead>
+            <tr>
 
-            {/* Table Body */}
-            <tbody>
+              <th className="p-5 text-left">
+                ID
+              </th>
 
-              {filteredAssets.length > 0 ? (
+              <th className="p-5 text-left">
+                Asset
+              </th>
 
-                filteredAssets.map((asset) => (
+              <th className="p-5 text-left">
+                Type
+              </th>
 
-                  <tr
-                    key={asset.id}
-                    className="border-t hover:bg-gray-50"
-                  >
+              <th className="p-5 text-left">
+                Brand
+              </th>
 
-                    <td className="p-4">
-                      {asset.id}
-                    </td>
+              <th className="p-5 text-left">
+                Serial
+              </th>
 
-                    <td className="p-4">
-                      {asset.name}
-                    </td>
+              <th className="p-5 text-left">
+                Purchase Date
+              </th>
 
-                    <td className="p-4">
-                      {asset.type}
-                    </td>
+              <th className="p-5 text-left">
+                Location
+              </th>
 
-                    <td className="p-4">
+              <th className="p-5 text-left">
+                Status
+              </th>
 
-                      {/* Edit */}
-                      <button
-                        onClick={() =>
-                          handleEdit(asset)
+              <th className="p-5 text-left">
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredAssets.map(
+              (asset) => (
+
+                <tr
+                  key={asset.id}
+                  className="
+                    border-t
+                    hover:bg-blue-50
+                    transition
+                  "
+                >
+
+                  <td className="p-5">
+                    {asset.id}
+                  </td>
+
+                  <td className="p-5 font-semibold">
+                    {asset.name}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.type}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.brand}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.serialNumber}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.purchaseDate}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.location}
+                  </td>
+
+                  <td className="p-5">
+
+                    <span
+                      className={`
+                        px-4
+                        py-2
+                        rounded-full
+                        text-sm
+                        font-semibold
+
+                        ${
+                          asset.status ===
+                          "Available"
+                            ? "bg-green-100 text-green-700"
+                            : asset.status ===
+                              "Assigned"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-red-100 text-red-700"
                         }
-                        className="bg-yellow-500 text-white px-4 py-2 rounded-lg mr-2 hover:bg-yellow-600 transition"
-                      >
-                        Edit
-                      </button>
+                      `}
+                    >
+                      {asset.status}
+                    </span>
 
-                      {/* Delete */}
-                      <button
-                        onClick={() =>
-                          handleDelete(asset.id)
-                        }
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-                      >
-                        Delete
-                      </button>
-
-                    </td>
-
-                  </tr>
-                ))
-
-              ) : (
-
-                <tr>
+                  </td>
 
                   <td
-                    colSpan="4"
-                    className="text-center p-6 text-gray-500"
+                    className="
+                      p-5
+                      flex
+                      gap-3
+                    "
                   >
-                    No assets found
+
+                    <button
+                      onClick={() =>
+                        handleEdit(
+                          asset
+                        )
+                      }
+                      className="
+                        bg-gradient-to-r
+                        from-yellow-400
+                        to-yellow-600
+                        text-white
+                        px-5
+                        py-2
+                        rounded-xl
+                        hover:scale-105
+                        transition
+                      "
+                    >
+                      ✏ Edit
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          asset.id
+                        )
+                      }
+                      className="
+                        bg-gradient-to-r
+                        from-red-500
+                        to-red-700
+                        text-white
+                        px-5
+                        py-2
+                        rounded-xl
+                        hover:scale-105
+                        transition
+                      "
+                    >
+                      🗑 Delete
+                    </button>
+
                   </td>
 
                 </tr>
-              )}
+              )
+            )}
 
-            </tbody>
+          </tbody>
 
-          </table>
-
-        </div>
+        </table>
 
       </div>
 

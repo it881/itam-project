@@ -9,7 +9,15 @@ function Assets() {
   const [assets, setAssets] =
     useState([]);
 
-  const [name, setName] =
+  // FORM STATES
+
+  const [assetId, setAssetId] =
+    useState("");
+
+  const [employeeId, setEmployeeId] =
+    useState("");
+
+  const [employeeName, setEmployeeName] =
     useState("");
 
   const [type, setType] =
@@ -66,12 +74,15 @@ function Assets() {
     async () => {
 
       if (
-        !name ||
+        !assetId ||
+        !employeeId ||
+        !employeeName ||
         !type ||
         !brand ||
         !serialNumber ||
         !status
       ) {
+
         alert(
           "Please fill all fields"
         );
@@ -80,7 +91,9 @@ function Assets() {
       }
 
       const payload = {
-        name,
+        assetId,
+        employeeId,
+        employeeName,
         type,
         brand,
         serialNumber,
@@ -110,8 +123,6 @@ function Assets() {
           }
         );
 
-        setEditingId(null);
-
       } else {
 
         // CREATE
@@ -134,8 +145,6 @@ function Assets() {
         );
       }
 
-      // CLEAR FORM
-
       resetForm();
 
       fetchAssets();
@@ -145,7 +154,9 @@ function Assets() {
 
   const resetForm = () => {
 
-    setName("");
+    setAssetId("");
+    setEmployeeId("");
+    setEmployeeName("");
     setType("");
     setBrand("");
     setSerialNumber("");
@@ -184,8 +195,16 @@ function Assets() {
     asset
   ) => {
 
-    setName(
-      asset.name || ""
+    setAssetId(
+      asset.assetId || ""
+    );
+
+    setEmployeeId(
+      asset.employeeId || ""
+    );
+
+    setEmployeeName(
+      asset.employeeName || ""
     );
 
     setType(
@@ -268,13 +287,28 @@ function Assets() {
   // SEARCH FILTER
 
   const filteredAssets =
-    assets.filter((asset) =>
-      asset.name
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
-    );
+    assets.filter((asset) => {
+
+      return (
+        asset.assetId
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+
+        asset.employeeName
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+
+        asset.type
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
+      );
+    });
 
   return (
 
@@ -337,7 +371,6 @@ function Assets() {
             py-3
             rounded-2xl
             shadow-lg
-            transition
           "
         >
           ← Dashboard
@@ -349,68 +382,26 @@ function Assets() {
 
       <div
         className="
-          bg-white/90
-          backdrop-blur-lg
+          bg-white
           rounded-3xl
           shadow-2xl
-          border
-          border-gray-200
           p-10
           mb-10
         "
       >
 
-        <div
+        <h2
           className="
-            flex
-            justify-between
-            items-center
+            text-4xl
+            font-bold
             mb-8
+            text-slate-800
           "
         >
+          Asset Management
+        </h2>
 
-          <div>
-
-            <h2
-              className="
-                text-4xl
-                font-bold
-                text-slate-800
-              "
-            >
-              Asset Management
-            </h2>
-
-            <p
-              className="
-                text-gray-500
-                mt-2
-              "
-            >
-              Manage company assets
-              professionally
-            </p>
-
-          </div>
-
-          <div
-            className="
-              bg-blue-100
-              text-blue-700
-              px-6
-              py-3
-              rounded-2xl
-              font-semibold
-            "
-          >
-            Total Assets:
-            {" "}
-            {assets.length}
-          </div>
-
-        </div>
-
-        {/* FORM GRID */}
+        {/* INPUTS */}
 
         <div
           className="
@@ -422,23 +413,38 @@ function Assets() {
 
           <input
             type="text"
-            placeholder="Asset Name"
-            value={name}
+            placeholder="Asset ID"
+            value={assetId}
             onChange={(e) =>
-              setName(
+              setAssetId(
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
+          />
+
+          <input
+            type="text"
+            placeholder="Employee ID"
+            value={employeeId}
+            onChange={(e) =>
+              setEmployeeId(
+                e.target.value
+              )
+            }
+            className="border p-4 rounded-2xl"
+          />
+
+          <input
+            type="text"
+            placeholder="Employee Name"
+            value={employeeName}
+            onChange={(e) =>
+              setEmployeeName(
+                e.target.value
+              )
+            }
+            className="border p-4 rounded-2xl"
           />
 
           <input
@@ -450,16 +456,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           />
 
           <input
@@ -471,16 +468,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           />
 
           <input
@@ -492,16 +480,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           />
 
           <input
@@ -512,16 +491,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           />
 
           <input
@@ -533,16 +503,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           />
 
           <select
@@ -552,16 +513,7 @@ function Assets() {
                 e.target.value
               )
             }
-            className="
-              border
-              border-gray-300
-              bg-gray-50
-              p-4
-              rounded-2xl
-              focus:ring-2
-              focus:ring-blue-500
-              outline-none
-            "
+            className="border p-4 rounded-2xl"
           >
 
             <option value="">
@@ -600,35 +552,28 @@ function Assets() {
               handleSaveAsset
             }
             className="
-              bg-gradient-to-r
-              from-blue-600
-              to-blue-800
+              bg-blue-600
+              hover:bg-blue-700
               text-white
-              px-10
+              px-8
               py-4
               rounded-2xl
-              shadow-xl
-              hover:scale-105
-              transition
-              font-semibold
+              shadow-lg
             "
           >
             {editingId
-              ? "✏ Update Asset"
-              : "➕ Add Asset"}
+              ? "Update Asset"
+              : "Add Asset"}
           </button>
 
           <button
             onClick={resetForm}
             className="
-              bg-gray-200
-              hover:bg-gray-300
-              text-slate-700
+              bg-gray-300
+              hover:bg-gray-400
               px-8
               py-4
               rounded-2xl
-              transition
-              font-semibold
             "
           >
             Reset
@@ -639,23 +584,16 @@ function Assets() {
               handleExport
             }
             className="
-              bg-gradient-to-r
-              from-green-500
-              to-green-700
+              bg-green-600
+              hover:bg-green-700
               text-white
               px-8
               py-4
               rounded-2xl
-              shadow-lg
-              hover:scale-105
-              transition
-              font-semibold
             "
           >
-            📥 Export Excel
+            Export Excel
           </button>
-
-          {/* IMPORT */}
 
           <input
             type="file"
@@ -672,20 +610,15 @@ function Assets() {
               fileInputRef.current.click()
             }
             className="
-              bg-gradient-to-r
-              from-purple-500
-              to-purple-700
+              bg-purple-600
+              hover:bg-purple-700
               text-white
               px-8
               py-4
               rounded-2xl
-              shadow-lg
-              hover:scale-105
-              transition
-              font-semibold
             "
           >
-            📤 Import Excel
+            Import Excel
           </button>
 
         </div>
@@ -694,31 +627,24 @@ function Assets() {
 
       {/* SEARCH */}
 
-      <div className="mb-6">
-
-        <input
-          type="text"
-          placeholder="🔍 Search Assets..."
-          value={search}
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-          className="
-            w-full
-            border
-            border-gray-300
-            p-5
-            rounded-2xl
-            shadow-lg
-            focus:ring-2
-            focus:ring-blue-500
-            outline-none
-          "
-        />
-
-      </div>
+      <input
+        type="text"
+        placeholder="🔍 Search Assets..."
+        value={search}
+        onChange={(e) =>
+          setSearch(
+            e.target.value
+          )
+        }
+        className="
+          w-full
+          border
+          p-5
+          rounded-2xl
+          shadow-lg
+          mb-6
+        "
+      />
 
       {/* TABLE */}
 
@@ -727,7 +653,7 @@ function Assets() {
           bg-white
           rounded-3xl
           shadow-2xl
-          overflow-hidden
+          overflow-auto
         "
       >
 
@@ -735,9 +661,7 @@ function Assets() {
 
           <thead
             className="
-              bg-gradient-to-r
-              from-slate-900
-              to-slate-700
+              bg-slate-800
               text-white
             "
           >
@@ -745,11 +669,15 @@ function Assets() {
             <tr>
 
               <th className="p-5 text-left">
-                ID
+                Asset ID
               </th>
 
               <th className="p-5 text-left">
-                Asset
+                Employee ID
+              </th>
+
+              <th className="p-5 text-left">
+                Employee Name
               </th>
 
               <th className="p-5 text-left">
@@ -794,16 +722,19 @@ function Assets() {
                   className="
                     border-t
                     hover:bg-blue-50
-                    transition
                   "
                 >
 
                   <td className="p-5">
-                    {asset.id}
+                    {asset.assetId}
+                  </td>
+
+                  <td className="p-5">
+                    {asset.employeeId}
                   </td>
 
                   <td className="p-5 font-semibold">
-                    {asset.name}
+                    {asset.employeeName}
                   </td>
 
                   <td className="p-5">
@@ -827,38 +758,10 @@ function Assets() {
                   </td>
 
                   <td className="p-5">
-
-                    <span
-                      className={`
-                        px-4
-                        py-2
-                        rounded-full
-                        text-sm
-                        font-semibold
-
-                        ${
-                          asset.status ===
-                          "Available"
-                            ? "bg-green-100 text-green-700"
-                            : asset.status ===
-                              "Assigned"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-red-100 text-red-700"
-                        }
-                      `}
-                    >
-                      {asset.status}
-                    </span>
-
+                    {asset.status}
                   </td>
 
-                  <td
-                    className="
-                      p-5
-                      flex
-                      gap-3
-                    "
-                  >
+                  <td className="p-5 flex gap-3">
 
                     <button
                       onClick={() =>
@@ -867,18 +770,15 @@ function Assets() {
                         )
                       }
                       className="
-                        bg-gradient-to-r
-                        from-yellow-400
-                        to-yellow-600
+                        bg-yellow-500
+                        hover:bg-yellow-600
                         text-white
-                        px-5
+                        px-4
                         py-2
                         rounded-xl
-                        hover:scale-105
-                        transition
                       "
                     >
-                      ✏ Edit
+                      Edit
                     </button>
 
                     <button
@@ -888,18 +788,15 @@ function Assets() {
                         )
                       }
                       className="
-                        bg-gradient-to-r
-                        from-red-500
-                        to-red-700
+                        bg-red-600
+                        hover:bg-red-700
                         text-white
-                        px-5
+                        px-4
                         py-2
                         rounded-xl
-                        hover:scale-105
-                        transition
                       "
                     >
-                      🗑 Delete
+                      Delete
                     </button>
 
                   </td>

@@ -12,19 +12,25 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+//
 // CREATE UPLOADS FOLDER
+//
 
 if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
 }
 
+//
 // FILE UPLOAD
+//
 
 const upload = multer({
   dest: "uploads/",
 });
 
+//
 // DATABASE
+//
 
 const db = new sqlite3.Database(
   "./database.db",
@@ -41,12 +47,15 @@ const db = new sqlite3.Database(
 );
 
 //
-// CREATE TABLES
+// CREATE TABLE
 //
 
 db.run(`
   CREATE TABLE IF NOT EXISTS assets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    assetId TEXT,
+    employeeId TEXT,
+    employeeName TEXT,
     name TEXT,
     type TEXT,
     brand TEXT,
@@ -57,35 +66,43 @@ db.run(`
   )
 `);
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS employees (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
-    department TEXT,
-    designation TEXT
-  )
-`);
+//
+// ADD MISSING COLUMNS
+//
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS assignments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    asset_name TEXT,
-    employee_name TEXT,
-    assigned_date TEXT
-  )
-`);
+const addColumn = (
+  columnName,
+  type = "TEXT"
+) => {
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS maintenance (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    asset_name TEXT,
-    issue_description TEXT,
-    vendor TEXT,
-    status TEXT,
-    maintenance_date TEXT
-  )
-`);
+  db.run(
+    `
+    ALTER TABLE assets
+    ADD COLUMN ${columnName} ${type}
+    `,
+    (err) => {
+
+      if (
+        err &&
+        !err.message.includes(
+          "duplicate column name"
+        )
+      ) {
+
+        console.log(err.message);
+      }
+    }
+  );
+};
+
+addColumn("assetId");
+addColumn("employeeId");
+addColumn("employeeName");
+addColumn("brand");
+addColumn("serialNumber");
+addColumn("status");
+addColumn("purchaseDate");
+addColumn("location");
 
 //
 // LOGIN API
@@ -116,15 +133,17 @@ app.post("/api/login", (req, res) => {
 });
 
 //
-// ASSETS APIs
-//
-
 // GET ASSETS
+//
 
 app.get("/api/assets", (req, res) => {
 
   db.all(
-    "SELECT * FROM assets ORDER BY id DESC",
+    `
+    SELECT *
+    FROM assets
+    ORDER BY id DESC
+    `,
     [],
     (err, rows) => {
 
@@ -140,11 +159,16 @@ app.get("/api/assets", (req, res) => {
   );
 });
 
+//
 // ADD ASSET
+//
 
 app.post("/api/assets", (req, res) => {
 
   const {
+    assetId,
+    employeeId,
+    employeeName,
     name,
     type,
     brand,
@@ -158,6 +182,9 @@ app.post("/api/assets", (req, res) => {
     `
     INSERT INTO assets
     (
+      assetId,
+      employeeId,
+      employeeName,
       name,
       type,
       brand,
@@ -166,9 +193,12 @@ app.post("/api/assets", (req, res) => {
       purchaseDate,
       location
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
+      assetId,
+      employeeId,
+      employeeName,
       name,
       type,
       brand,
@@ -195,13 +225,18 @@ app.post("/api/assets", (req, res) => {
   );
 });
 
+//
 // UPDATE ASSET
+//
 
 app.put("/api/assets/:id", (req, res) => {
 
   const { id } = req.params;
 
   const {
+    assetId,
+    employeeId,
+    employeeName,
     name,
     type,
     brand,
@@ -215,6 +250,9 @@ app.put("/api/assets/:id", (req, res) => {
     `
     UPDATE assets
     SET
+      assetId = ?,
+      employeeId = ?,
+      employeeName = ?,
       name = ?,
       type = ?,
       brand = ?,
@@ -225,6 +263,9 @@ app.put("/api/assets/:id", (req, res) => {
     WHERE id = ?
     `,
     [
+      assetId,
+      employeeId,
+      employeeName,
       name,
       type,
       brand,
@@ -252,14 +293,19 @@ app.put("/api/assets/:id", (req, res) => {
   );
 });
 
+//
 // DELETE ASSET
+//
 
 app.delete("/api/assets/:id", (req, res) => {
 
   const { id } = req.params;
 
   db.run(
-    "DELETE FROM assets WHERE id = ?",
+    `
+    DELETE FROM assets
+    WHERE id = ?
+    `,
     [id],
 
     function (err) {
@@ -274,144 +320,6 @@ app.delete("/api/assets/:id", (req, res) => {
       res.json({
         message:
           "Asset deleted successfully",
-      });
-    }
-  );
-});
-
-//
-// EMPLOYEE APIs
-//
-
-app.get("/api/employees", (req, res) => {
-
-  db.all(
-    "SELECT * FROM employees",
-    [],
-    (err, rows) => {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json(rows);
-    }
-  );
-});
-
-app.post("/api/employees", (req, res) => {
-
-  const {
-    name,
-    email,
-    department,
-    designation,
-  } = req.body;
-
-  db.run(
-    `
-    INSERT INTO employees
-    (
-      name,
-      email,
-      department,
-      designation
-    )
-    VALUES (?, ?, ?, ?)
-    `,
-    [
-      name,
-      email,
-      department,
-      designation,
-    ],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Employee added successfully",
-      });
-    }
-  );
-});
-
-app.put("/api/employees/:id", (req, res) => {
-
-  const { id } = req.params;
-
-  const {
-    name,
-    email,
-    department,
-    designation,
-  } = req.body;
-
-  db.run(
-    `
-    UPDATE employees
-    SET
-      name = ?,
-      email = ?,
-      department = ?,
-      designation = ?
-    WHERE id = ?
-    `,
-    [
-      name,
-      email,
-      department,
-      designation,
-      id,
-    ],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Employee updated successfully",
-      });
-    }
-  );
-});
-
-app.delete("/api/employees/:id", (req, res) => {
-
-  const { id } = req.params;
-
-  db.run(
-    "DELETE FROM employees WHERE id = ?",
-    [id],
-
-    function (err) {
-
-      if (err) {
-
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-
-      res.json({
-        message:
-          "Employee deleted successfully",
       });
     }
   );
@@ -498,6 +406,9 @@ app.post(
           `
           INSERT INTO assets
           (
+            assetId,
+            employeeId,
+            employeeName,
             name,
             type,
             brand,
@@ -506,9 +417,12 @@ app.post(
             purchaseDate,
             location
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
           [
+            item.assetId || "",
+            item.employeeId || "",
+            item.employeeName || "",
             item.name || "",
             item.type || "",
             item.brand || "",
